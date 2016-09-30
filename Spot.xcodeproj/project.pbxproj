@@ -14,6 +14,7 @@
 		2DCC27B11D9ED1E200967AC2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2DCC27AF1D9ED1E200967AC2 /* LaunchScreen.storyboard */; };
 		2DCC27B91D9ED3AB00967AC2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2DCC27B81D9ED3AB00967AC2 /* GoogleService-Info.plist */; };
 		2DCC27BC1D9ED6D200967AC2 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 2DCC27BB1D9ED6D200967AC2 /* .gitignore */; };
+		2DCC27BE1D9EE0DD00967AC2 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DCC27BD1D9EE0DD00967AC2 /* MapKit.framework */; };
 		8A119869B03E7875FBFB0C96 /* Pods_Spot.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56094696E45F9C338EE5BBEF /* Pods_Spot.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,7 @@
 		2DCC27B81D9ED3AB00967AC2 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		2DCC27BA1D9ED66700967AC2 /* Spot.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Spot.entitlements; sourceTree = "<group>"; };
 		2DCC27BB1D9ED6D200967AC2 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		2DCC27BD1D9EE0DD00967AC2 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		4965404986F343F326857A19 /* Pods-Spot.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Spot.release.xcconfig"; path = "Pods/Target Support Files/Pods-Spot/Pods-Spot.release.xcconfig"; sourceTree = "<group>"; };
 		56094696E45F9C338EE5BBEF /* Pods_Spot.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Spot.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE67FCD162E5C30C514528E5 /* Pods-Spot.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Spot.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Spot/Pods-Spot.debug.xcconfig"; sourceTree = "<group>"; };
@@ -38,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2DCC27BE1D9EE0DD00967AC2 /* MapKit.framework in Frameworks */,
 				8A119869B03E7875FBFB0C96 /* Pods_Spot.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -91,6 +94,7 @@
 		940CAE25DBA79BE8A6C50B3E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2DCC27BD1D9EE0DD00967AC2 /* MapKit.framework */,
 				56094696E45F9C338EE5BBEF /* Pods_Spot.framework */,
 			);
 			name = Frameworks;
@@ -134,7 +138,13 @@
 						DevelopmentTeam = M8579RUEVZ;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
 							com.apple.Keychain = {
+								enabled = 1;
+							};
+							com.apple.Maps.iOS = {
 								enabled = 1;
 							};
 						};
