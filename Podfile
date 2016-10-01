@@ -6,5 +6,7 @@ use_frameworks!
 target 'Spot' do
 
   pod 'Firebase'
+  pod 'Firebase/Database'
+  pod 'Firebase/Auth'
 
 end
