@@ -34,9 +34,23 @@ class ViewController: UIViewController {
             if error != nil {
                 print("Error signing in:", error)
             } else {
-//                if let user = user {
-////                    self.currentUserId = user.uid
-//                }
+                let alertController = UIAlertController(title: "Enter your name", message: "", preferredStyle: .alert)
+                var nameTextField = UITextField()
+                nameTextField.placeholder = "Name"
+                let confirmAction = UIAlertAction(title: "Confirm", style: .default, handler: { (action) in
+                    if !nameTextField.text!.isEmpty {
+                        self.setUsername(_name: nameTextField.text!)
+                    }
+                })
+                
+                alertController.addTextField(configurationHandler: { (textfield) in
+                    textfield.placeholder = "Name"
+                    textfield.autocapitalizationType = .words
+                    nameTextField = textfield
+                })
+                alertController.addAction(confirmAction)
+                self.present(alertController, animated: true, completion: nil)
+                
                 self.addObservers()
             }
         })
@@ -47,13 +61,26 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    func setUsername(_name: String) {
+        let databaseRef = FIRDatabase.database().reference()
+
+        databaseRef.child("locations").child((FIRAuth.auth()?.currentUser?.uid)!).updateChildValues(["username" : _name]) { (error, ref) in
+            if error != nil {
+                print("Error saving name", error)
+            } else {
+                print("Saved name")
+                self.locationManager.startUpdatingLocation()
+            }
+        }
+    }
+    
     func saveLocation(_ location: CLLocation) {
         guard FIRAuth.auth()?.currentUser != nil else {
             return
         }
         let databaseRef = FIRDatabase.database().reference()
-        let locationCoords = ["latitude": location.coordinate.latitude, "longitude" : location.coordinate.longitude]
-        databaseRef.child("locations").child((FIRAuth.auth()?.currentUser?.uid)!).setValue(locationCoords) { (error, dbRef) in
+        let userUpdates = ["latitude": location.coordinate.latitude, "longitude" : location.coordinate.longitude, "lastUpdate" : Date().timeIntervalSince1970]
+        databaseRef.child("locations").child((FIRAuth.auth()?.currentUser?.uid)!).updateChildValues(userUpdates) { (error, dbRef) in
             if error != nil {
                 print("Error setting value:", error)
             } else {
@@ -73,12 +100,13 @@ class ViewController: UIViewController {
                     let longitude = locationDict["longitude"] as! CLLocationDegrees
                     
                     let location = CLLocation(latitude: latitude, longitude: longitude)
-                    
-                    let newUser = User(id: snapshot.key, location: location)
-                    
+                    let name = locationDict.value(forKey: "username") as? String ?? ""
+                    let lastUpdate = locationDict.value(forKey: "lastUpdate") as? TimeInterval ?? 0.0
+
+                    let newUser = User(id: snapshot.key, name: name, location: location, lastUpdate: lastUpdate)
                     self.users.append(newUser)
 
-                    let pin = UserAnnotation(_userId: newUser.id, _userLocation: newUser.location, _title: "", _subtitle: "")
+                    let pin = UserAnnotation(_user: newUser)
                     self.mapView.addAnnotation(pin)
                     print("Added new pin -- CREATION")
                 }
@@ -106,14 +134,33 @@ class ViewController: UIViewController {
                             let longitude = locationDict["longitude"] as! CLLocationDegrees
                             
                             let location = CLLocation(latitude: latitude, longitude: longitude)
+                            let name = locationDict.value(forKey: "username") as? String ?? ""
+                            let lastUpdate = locationDict.value(forKey: "lastUpdate") as? TimeInterval ?? 0.0
                             
-                            let newUser = User(id: snapshot.key, location: location)
-                            
+                            let newUser = User(id: snapshot.key, name: name, location: location, lastUpdate: lastUpdate)
                             self.users[index] = newUser
 
-                            let pin = UserAnnotation(_userId: newUser.id, _userLocation: newUser.location, _title: "", _subtitle: "")
+                            let pin = UserAnnotation(_user: newUser)
                             self.mapView.addAnnotation(pin)
                             print("Added new pin -- UPDATE")
+                        }
+                    }
+                }
+            }
+        })
+        
+        databaseRef.child("locations").observe(.childRemoved, with: { (snapshot) -> Void in
+            if snapshot.key != FIRAuth.auth()?.currentUser?.uid {
+                print("Child removed:", snapshot.key)
+                
+                for (index, user) in self.users.enumerated() {
+                    for pin in self.mapView.annotations {
+                        if pin is UserAnnotation {
+                            if (pin as! UserAnnotation).id == user.id {
+                                self.mapView.removeAnnotation(pin)
+                                self.users.remove(at: index)
+                                print("Removed deleted pin")
+                            }
                         }
                     }
                 }
@@ -127,7 +174,7 @@ extension ViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedWhenInUse {
 //            locationManager.requestLocation()
-            locationManager.startUpdatingLocation()
+//            locationManager.startUpdatingLocation()
         }
     }
     
@@ -149,6 +196,8 @@ extension ViewController: CLLocationManagerDelegate {
 
 struct User {
     var id: String!
+    var name: String!
     var location: CLLocation!
+    var lastUpdate: TimeInterval!
 }
 
