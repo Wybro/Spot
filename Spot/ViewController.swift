@@ -17,9 +17,11 @@ class ViewController: UIViewController {
     var currentLocation: CLLocation?
 
     @IBOutlet var mapView: MKMapView!
-    
-//    var userLocations = [CLLocation]()
+    @IBOutlet var spotButton: UIButton!
+
     var users = [User]()
+    
+    var userSpot: MKOverlay!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,37 +30,70 @@ class ViewController: UIViewController {
         locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         locationManager.requestWhenInUseAuthorization()
         locationManager.distanceFilter = 10
-//        locationManager.requestLocation()
         
-        FIRAuth.auth()?.signInAnonymously(completion: { (user, error) in
-            if error != nil {
-                print("Error signing in:", error)
-            } else {
-                let alertController = UIAlertController(title: "Enter your name", message: "", preferredStyle: .alert)
-                var nameTextField = UITextField()
-                nameTextField.placeholder = "Name"
-                let confirmAction = UIAlertAction(title: "Confirm", style: .default, handler: { (action) in
-                    if !nameTextField.text!.isEmpty {
-                        self.setUsername(_name: nameTextField.text!)
-                    }
-                })
-                
-                alertController.addTextField(configurationHandler: { (textfield) in
-                    textfield.placeholder = "Name"
-                    textfield.autocapitalizationType = .words
-                    nameTextField = textfield
-                })
-                alertController.addAction(confirmAction)
-                self.present(alertController, animated: true, completion: nil)
-                
-                self.addObservers()
-            }
-        })
+        signIn()
+        
+        spotButton.layer.cornerRadius = 10
+        
+        // Create simulated users for testing
+//        addTestUsers(_amount: 5)
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func addTestUsers(_amount: Int) {
+        print("Creating \(_amount) test users")
+        let databaseRef = FIRDatabase.database().reference()
+        
+        for index in 1..._amount {
+            let randomNumber = Double(arc4random_uniform(20))
+            let secondRandomNumber = Double(arc4random_uniform(10))
+            let latitude: CLLocationDegrees = 42.81850396193826 + (0.0005 * Double(index)) + (0.00025 * randomNumber) - (0.00015 * secondRandomNumber)
+            let longitude: CLLocationDegrees = -75.54432160228076 + (0.0005 * Double(index)) + (0.00025 * randomNumber) - (0.00005 * secondRandomNumber)
+            
+            let userUpdates = ["latitude" : latitude, "longitude" : longitude, "lastUpdate": Date().timeIntervalSince1970, "username": "test_\(index)"] as [String : Any]
+            databaseRef.child("locations").childByAutoId().updateChildValues(userUpdates)
+        }
+    }
+    
+    func signIn() {
+        if FIRAuth.auth()?.currentUser != nil {
+            print("User already signed in")
+            self.locationManager.startUpdatingLocation()
+            self.addObservers()
+        }else {
+            FIRAuth.auth()?.signInAnonymously(completion: { (user, error) in
+                if error != nil {
+                    print("Error signing in:", error)
+                } else {
+                    print("Signed in anonymously")
+                    self.showUsernameAlert()
+                    self.addObservers()
+                }
+            })
+        }
+    }
+    
+    func showUsernameAlert() {
+        let alertController = UIAlertController(title: "Enter your name", message: "", preferredStyle: .alert)
+        var nameTextField = UITextField()
+        nameTextField.placeholder = "Name"
+        let confirmAction = UIAlertAction(title: "Confirm", style: .default, handler: { (action) in
+            if !nameTextField.text!.isEmpty {
+                self.setUsername(_name: nameTextField.text!)
+            }
+        })
+        
+        alertController.addTextField(configurationHandler: { (textfield) in
+            textfield.placeholder = "Name"
+            textfield.autocapitalizationType = .words
+            nameTextField = textfield
+        })
+        alertController.addAction(confirmAction)
+        self.present(alertController, animated: true, completion: nil)
     }
     
     func setUsername(_name: String) {
@@ -95,7 +130,6 @@ class ViewController: UIViewController {
         databaseRef.child("locations").observe(.childAdded, with: { (snapshot) -> Void in
             if snapshot.key != FIRAuth.auth()?.currentUser?.uid {
                 if let locationDict = snapshot.value as? NSDictionary {
-                    print("New child")
                     let latitude = locationDict["latitude"] as! CLLocationDegrees
                     let longitude = locationDict["longitude"] as! CLLocationDegrees
                     
@@ -108,7 +142,7 @@ class ViewController: UIViewController {
 
                     let pin = UserAnnotation(_user: newUser)
                     self.mapView.addAnnotation(pin)
-                    print("Added new pin -- CREATION")
+                    print("Added new pin")
                 }
             }
         })
@@ -142,7 +176,7 @@ class ViewController: UIViewController {
 
                             let pin = UserAnnotation(_user: newUser)
                             self.mapView.addAnnotation(pin)
-                            print("Added new pin -- UPDATE")
+                            print("Added new pin")
                         }
                     }
                 }
@@ -153,12 +187,12 @@ class ViewController: UIViewController {
             if snapshot.key != FIRAuth.auth()?.currentUser?.uid {
                 print("Child removed:", snapshot.key)
                 
-                for (index, user) in self.users.enumerated() {
+                for (index, _) in self.users.enumerated() {
                     for pin in self.mapView.annotations {
                         if pin is UserAnnotation {
-                            if (pin as! UserAnnotation).id == user.id {
-                                self.mapView.removeAnnotation(pin)
+                            if (pin as! UserAnnotation).id == snapshot.key {
                                 self.users.remove(at: index)
+                                self.mapView.removeAnnotation(pin)
                                 print("Removed deleted pin")
                             }
                         }
@@ -166,6 +200,30 @@ class ViewController: UIViewController {
                 }
             }
         })
+    }
+    
+    @IBAction func spotButtonAction(_ sender: UIButton) {
+        if sender.currentTitle! == "Enable Spot" {
+            sender.setTitle("Disable Spot", for: .normal)
+            sender.backgroundColor = UIColor(red: 237/255, green: 106/255, blue: 94/255, alpha: 1)
+            enableSpot()
+        } else {
+            sender.setTitle("Enable Spot", for: .normal)
+            sender.backgroundColor = UIColor(red: 76/255, green: 224/255, blue: 179/255, alpha: 1)
+            disableSpot()
+        }
+    }
+    
+    func enableSpot() {
+        let userLocation = locationManager.location?.coordinate
+        let circle = MKCircle(center: userLocation!, radius: 50)
+        self.userSpot = circle
+        
+        self.mapView.addOverlays([circle])
+    }
+    
+    func disableSpot() {
+        self.mapView.remove(userSpot)
     }
 
 }
@@ -192,6 +250,36 @@ extension ViewController: CLLocationManagerDelegate {
         print("Location manager failed with error:", error)
     }
     
+}
+
+extension ViewController: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        if annotation is MKUserLocation {
+            return nil
+        }
+        
+        let annotationId = "userDotAnnotation"
+        
+        var anView = mapView.dequeueReusableAnnotationView(withIdentifier: annotationId)
+        if anView == nil {
+            if annotation is UserAnnotation {
+                anView = MKAnnotationView(annotation: annotation, reuseIdentifier: annotationId)
+                anView?.image = UIImage(named: "userDot")
+            }
+            anView?.canShowCallout = true
+        } else {
+            anView?.annotation = annotation
+        }
+        return anView
+    }
+    
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        let circleRenderer = MKCircleRenderer(overlay: overlay)
+        circleRenderer.fillColor = UIColor.green.withAlphaComponent(0.1)
+        circleRenderer.strokeColor = UIColor.green
+        circleRenderer.lineWidth = 1
+        return circleRenderer
+    }
 }
 
 struct User {

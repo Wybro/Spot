@@ -18,18 +18,39 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" mapType="standard" pitchEnabled="NO" showsUserLocation="YES" showsPointsOfInterest="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HVK-Pz-8ZD">
-                                <frame key="frameInset"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" pitchEnabled="NO" showsUserLocation="YES" showsPointsOfInterest="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HVK-Pz-8ZD">
                                 <connections>
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="dTy-jh-tKz"/>
                                 </connections>
                             </mapView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="W43-BT-mXp">
+                                <color key="backgroundColor" red="0.29803921570000003" green="0.87843137250000003" blue="0.70196078429999997" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="150" id="MAG-zV-wc9"/>
+                                    <constraint firstAttribute="height" constant="50" id="fZ0-gd-Yo7"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                                <state key="normal" title="Enable Spot">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="spotButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="1eI-fd-LKq"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="HVK-Pz-8ZD" secondAttribute="trailing" id="8ua-nO-V8M"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="HVK-Pz-8ZD" secondAttribute="bottom" id="JYU-KE-ag5"/>
+                            <constraint firstItem="W43-BT-mXp" firstAttribute="centerX" secondItem="HVK-Pz-8ZD" secondAttribute="centerX" id="OFd-dn-0bt"/>
+                            <constraint firstItem="HVK-Pz-8ZD" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="TKx-7V-j9e"/>
+                            <constraint firstItem="HVK-Pz-8ZD" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="f3N-Hu-Efm"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="W43-BT-mXp" secondAttribute="bottom" constant="8" id="pX8-hH-ifb"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="mapView" destination="HVK-Pz-8ZD" id="nlN-yI-530"/>
+                        <outlet property="spotButton" destination="W43-BT-mXp" id="jql-KE-E1t"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
