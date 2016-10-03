@@ -24,7 +24,7 @@
                                 </connections>
                             </mapView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="W43-BT-mXp">
-                                <color key="backgroundColor" red="0.29803921570000003" green="0.87843137250000003" blue="0.70196078429999997" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="backgroundColor" red="0.16078431372549018" green="0.6705882352941176" blue="0.88627450980392153" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="150" id="MAG-zV-wc9"/>
                                     <constraint firstAttribute="height" constant="50" id="fZ0-gd-Yo7"/>
@@ -37,10 +37,22 @@
                                     <action selector="spotButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="1eI-fd-LKq"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="e5F-f3-zgi">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="30" id="kBB-w2-mcq"/>
+                                    <constraint firstAttribute="height" constant="30" id="zoE-2E-h6k"/>
+                                </constraints>
+                                <state key="normal" image="centerButton"/>
+                                <connections>
+                                    <action selector="centerButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="aIP-WD-env"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="HVK-Pz-8ZD" secondAttribute="trailing" id="8ua-nO-V8M"/>
+                            <constraint firstItem="W43-BT-mXp" firstAttribute="top" secondItem="e5F-f3-zgi" secondAttribute="bottom" constant="8" id="Bag-fx-i92"/>
+                            <constraint firstItem="e5F-f3-zgi" firstAttribute="centerX" secondItem="HVK-Pz-8ZD" secondAttribute="centerX" id="Huh-gn-Ttx"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="HVK-Pz-8ZD" secondAttribute="bottom" id="JYU-KE-ag5"/>
                             <constraint firstItem="W43-BT-mXp" firstAttribute="centerX" secondItem="HVK-Pz-8ZD" secondAttribute="centerX" id="OFd-dn-0bt"/>
                             <constraint firstItem="HVK-Pz-8ZD" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="TKx-7V-j9e"/>
@@ -49,6 +61,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="centerButton" destination="e5F-f3-zgi" id="RgW-8B-ZtV"/>
                         <outlet property="mapView" destination="HVK-Pz-8ZD" id="nlN-yI-530"/>
                         <outlet property="spotButton" destination="W43-BT-mXp" id="jql-KE-E1t"/>
                     </connections>
@@ -58,4 +71,7 @@
             <point key="canvasLocation" x="117.59999999999999" y="97.601199400299862"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="centerButton" width="30" height="30"/>
+    </resources>
 </document>

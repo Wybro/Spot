@@ -18,10 +18,12 @@ class ViewController: UIViewController {
 
     @IBOutlet var mapView: MKMapView!
     @IBOutlet var spotButton: UIButton!
+    @IBOutlet var centerButton: UIButton!
 
     var users = [User]()
     
     var userSpot: MKOverlay!
+    var initialCenterUser = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -209,7 +211,7 @@ class ViewController: UIViewController {
             enableSpot()
         } else {
             sender.setTitle("Enable Spot", for: .normal)
-            sender.backgroundColor = UIColor(red: 76/255, green: 224/255, blue: 179/255, alpha: 1)
+            sender.backgroundColor = UIColor(red: 41/255, green: 171/255, blue: 226/255, alpha: 1)
             disableSpot()
         }
     }
@@ -225,23 +227,42 @@ class ViewController: UIViewController {
     func disableSpot() {
         self.mapView.remove(userSpot)
     }
+    
+    @IBAction func centerButtonAction(_ sender: UIButton) {
+        centerUser(_initial: false)
+    }
+    
+    func centerUser(_initial: Bool) {
+        let userLocation = locationManager.location?.coordinate
+
+        if _initial {
+            // Set view relatively high
+            let span = MKCoordinateSpanMake(0.012, 0.012)
+            let region = MKCoordinateRegion(center: userLocation!, span: span)
+            mapView.setRegion(region, animated: true)
+        } else {
+            // Maintain region span
+            var region = mapView.region
+            region.center = userLocation!
+            mapView.setRegion(region, animated: true)
+        }
+    }
 
 }
 
 extension ViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedWhenInUse {
-//            locationManager.requestLocation()
-//            locationManager.startUpdatingLocation()
         }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
-            let span = MKCoordinateSpanMake(0.002, 0.002)
-            let region = MKCoordinateRegion(center: location.coordinate, span: span)
-            mapView.setRegion(region, animated: true)
             
+            if !initialCenterUser {
+                initialCenterUser = true
+                centerUser(_initial: true)
+            }
             saveLocation(location)
         }
     }
@@ -266,7 +287,8 @@ extension ViewController: MKMapViewDelegate {
                 anView = MKAnnotationView(annotation: annotation, reuseIdentifier: annotationId)
                 anView?.image = UIImage(named: "userDot")
             }
-            anView?.canShowCallout = true
+            // True if want to show bubble
+            anView?.canShowCallout = false
         } else {
             anView?.annotation = annotation
         }
