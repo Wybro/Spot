@@ -7,6 +7,6 @@ target 'Spot' do
 
   pod 'Firebase'
   pod 'Firebase/Database'
-  pod 'Firebase/Auth'
+  pod 'Firebase/Crash'
 
 end
